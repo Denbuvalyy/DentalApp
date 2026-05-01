@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DentalApp.Pages.PatientDetailsPage"
+             Title="Patient">
+    <ContentPage.Content>
+        <VerticalStackLayout Padding="15" Spacing="10">
+
+            <Label Text="{Binding Patient.Name}" FontSize="20"/>
+            <Label Text="{Binding Patient.Phone}" />
+
+            <Button Text="➕ Add Visit"
+                    Command="{Binding AddVisitCommand}" />
+
+            <CollectionView ItemsSource="{Binding Visits}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Padding="10">
+                            <VerticalStackLayout>
+                                <Label Text="{Binding Date}" />
+                                <Label Text="{Binding Description}" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+
+    </ContentPage.Content>
+</ContentPage>

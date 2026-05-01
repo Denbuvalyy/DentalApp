@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DentalApp.Pages.AddVisitPage"
+             Title="New Visit">
+    <ContentPage.Content>
+        <ScrollView>
+            <VerticalStackLayout Padding="20" Spacing="12">
+
+                <DatePicker Date="{Binding Date}" />
+
+                <Editor Placeholder="Description"
+                        HeightRequest="120"
+                        Text="{Binding Description}" />
+
+                <HorizontalStackLayout Spacing="10">
+                    <Button Text="📸 Camera"
+                            Command="{Binding TakePhotoCommand}" />
+
+                    <Button Text="🖼 Gallery"
+                            Command="{Binding PickPhotoCommand}" />
+                </HorizontalStackLayout>
+
+                <CollectionView ItemsSource="{Binding Photos}"
+                                HeightRequest="120"
+                                ItemsLayout="HorizontalList">
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding FilePath}"
+                                   WidthRequest="100"
+                                   HeightRequest="100"
+                                   Aspect="AspectFill"/>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+
+                </CollectionView>
+
+                <Button Text="Save"
+                        Command="{Binding SaveCommand}" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </ContentPage.Content>
+</ContentPage>

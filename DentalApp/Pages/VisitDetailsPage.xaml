@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DentalApp.Pages.VisitDetailsPage">
+    <ContentPage.Content>
+        <VerticalStackLayout Padding="16" Spacing="12">
+
+            <Label Text="Photos" FontSize="20" />
+
+            <CollectionView ItemsSource="{Binding Photos}"
+                            ItemsLayout="VerticalGrid, 3">
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+
+                        <Frame Padding="2" Margin="4">
+
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenPhotoCommand}"
+                                    CommandParameter="{Binding .}" />
+                            </Frame.GestureRecognizers>
+
+                            <Image Source="{Binding FilePath}"
+                                   HeightRequest="100"
+                                   WidthRequest="100"
+                                   Aspect="AspectFill"/>
+
+                        </Frame>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ContentPage.Content>
+</ContentPage>
