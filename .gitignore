@@ -1,5 +1,32 @@
+# macOS
+.DS_Store
+
+# Rider / IntelliJ
+.idea/
+
+# Build
 bin/
 obj/
+
+# NuGet
 /packages/
-riderModule.iml
+
+# Rider
+*.iml
 /_ReSharper.Caches/
+
+# User-specific files
+*.user
+*.suo
+
+# Database
+*.db
+*.sqlite
+
+# MAUI / Mobile secrets
+*.keystore
+*.p12
+*.mobileprovision
+
+# Logs
+*.log
