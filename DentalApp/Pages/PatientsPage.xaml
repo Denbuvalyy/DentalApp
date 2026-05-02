@@ -7,7 +7,7 @@
     <ContentPage.Content>
         <VerticalStackLayout Padding="10">
 
-            <Button Text="Load"
+            <Button Text="Load now!"
                     Command="{Binding LoadCommand}" />
             <Button Text="➕ Add Patient"
                     Command="{Binding AddPatientCommand}"/>

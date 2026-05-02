@@ -1,0 +1,44 @@
+name: Build MAUI Android (.NET 10)
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 (preview)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          include-prerelease: true
+
+      - name: Install MAUI workload
+        run: |
+          dotnet workload install maui
+          dotnet workload install android
+
+      - name: Restore dependencies
+        run: dotnet restore DentalApp.sln
+
+      - name: Build Android
+        run: dotnet publish DentalApp/DentalApp.csproj -c Release -f net10.0-android
+
+      - name: Upload APK/AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build
+          path: |
+            **/bin/Release/net10.0-android/**/*.apk
+            **/bin/Release/net10.0-android/**/*.aab

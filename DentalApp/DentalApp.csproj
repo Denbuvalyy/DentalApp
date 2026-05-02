@@ -75,5 +75,4 @@
       <ProjectReference Include="..\DentalApp.Core\DentalApp.Core.csproj" />
       <ProjectReference Include="..\DentalApp.Infrastructure\DentalApp.Infrastructure.csproj" />
     </ItemGroup>
-
 </Project>
