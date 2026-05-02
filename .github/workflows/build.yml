@@ -2,13 +2,17 @@ name: Build MAUI Android (.NET 10)
 
 on:
   push:
-    branches: [ "main","develop" ]
-  pull_request:
-    branches: [ "main","develop" ]
+    branches:
+      - develop
+      - main
+    pull_request:
+      branches:
+        - develop
+        - main
     
 jobs:
   build-android:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout
