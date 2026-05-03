@@ -47,14 +47,13 @@ jobs:
       - name: Decode keystore
         if: github.event_name == 'push'
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" > keystore.txt
-          base64 --decode keystore.txt > dentalapp.keystore || base64 -D keystore.txt > dentalapp.keystore
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -D -o dentalapp.keystore
 
-          echo "Files in directory:"
+          echo "Files:"
           ls -la
 
           echo "Keystore size:"
-          stat -f%z dentalapp.keystore || wc -c dentalapp.keystore
+          stat -f%z dentalapp.keystore
 
       # 🔹 Signed build тільки після merge
       - name: Build signed AAB
