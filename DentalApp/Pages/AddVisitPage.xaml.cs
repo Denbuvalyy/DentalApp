@@ -27,4 +27,9 @@ public partial class AddVisitPage : ContentPage
         BindingContext = vm;
         _vm = vm;
     }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+    }
 }
