@@ -9,4 +9,12 @@ public class SampleTests
         Assert.Equal(5, result);
         //Assert.Equal(4, result);
     }
+    
+    [Fact]
+    public void Should_Add_FreshNumbers()
+    {
+        var result = 2 + 3;
+        Assert.Equal(7, result);
+        //Assert.Equal(4, result);
+    }
 }

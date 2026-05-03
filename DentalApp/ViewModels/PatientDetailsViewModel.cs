@@ -1,3 +1,4 @@
+using DentalApp.Constants;
 using DentalApp.Core.Interfaces;
 using DentalApp.Core.Models;
 using DentalApp.Pages;
@@ -61,10 +62,11 @@ public partial class PatientDetailsViewModel : ObservableObject
     [RelayCommand]
     private async Task AddVisit()
     {
-        var visit = await _navigationService.GoToAddVisit(patientId);
+        //var visit = await _navigationService.GoToAddVisit(patientId);
+        await Shell.Current.GoToAsync($"{Routes.AddVisit}?patientId={patient.Id}");
 
-        if (visit != null)
-            Visits.Add(visit);
+        // if (visit != null)
+        //     Visits.Add(visit);
         //await _navigationService.GoToAddVisit(patientId);
         //await Shell.Current.GoToAsync($"{nameof(AddVisitPage)}?patientId={patientId}");
     }
