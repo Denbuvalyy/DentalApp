@@ -14,14 +14,14 @@ on:
       - main
 
 jobs:
-  build-android:
+  build:
     runs-on: macos-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup .NET 10 (preview)
+      - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
@@ -32,20 +32,27 @@ jobs:
           dotnet workload install maui
           dotnet workload install android
 
-      - name: Restore dependencies
+      - name: Restore
         run: dotnet restore DentalApp.sln
 
       - name: Run tests
         run: dotnet test DentalApp.Tests/DentalApp.Tests.csproj -c Release --no-restore
 
-      # 🔑 Decode keystore
+      # 🔹 PR build (без підпису)
+      - name: Build (PR - unsigned)
+        if: github.event_name == 'pull_request'
+        run: dotnet publish DentalApp/DentalApp.csproj -c Release -f net10.0-android
+
+      # 🔹 Decode keystore тільки для push
       - name: Decode keystore
+        if: github.event_name == 'push'
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > dentalapp.keystore || \
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > dentalapp.keystore
 
-      # 📦 Build SIGNED AAB
-      - name: Build signed Android AAB
+      # 🔹 Signed build тільки після merge
+      - name: Build signed AAB
+        if: github.event_name == 'push'
         run: |
           dotnet publish DentalApp/DentalApp.csproj \
             -c Release \
@@ -56,8 +63,9 @@ jobs:
             /p:AndroidSigningKeyAlias=${{ secrets.KEY_ALIAS }} \
             /p:AndroidSigningKeyPass=${{ secrets.KEY_PASSWORD }}
 
-      # 🚀 Upload artifact
+      # 🔹 Artifact тільки для релізу
       - name: Upload AAB
+        if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: android-signed-build
