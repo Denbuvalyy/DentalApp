@@ -47,8 +47,14 @@ jobs:
       - name: Decode keystore
         if: github.event_name == 'push'
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > dentalapp.keystore || \
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > dentalapp.keystore
+          echo "${{ secrets.KEYSTORE_BASE64 }}" > keystore.txt
+          base64 --decode keystore.txt > dentalapp.keystore || base64 -D keystore.txt > dentalapp.keystore
+
+          echo "Files in directory:"
+          ls -la
+
+          echo "Keystore size:"
+          stat -f%z dentalapp.keystore || wc -c dentalapp.keystore
 
       # 🔹 Signed build тільки після merge
       - name: Build signed AAB
@@ -58,7 +64,7 @@ jobs:
             -c Release \
             -f net10.0-android \
             /p:AndroidKeyStore=true \
-            /p:AndroidSigningKeyStore=dentalapp.keystore \
+            /p:AndroidSigningKeyStore=$(pwd)/dentalapp.keystore \
             /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} \
             /p:AndroidSigningKeyAlias=${{ secrets.KEY_ALIAS }} \
             /p:AndroidSigningKeyPass=${{ secrets.KEY_PASSWORD }}
