@@ -41,19 +41,14 @@ jobs:
       # 🔹 PR build (без підпису)
       - name: Build (PR - unsigned)
         if: github.event_name == 'pull_request'
-        run: dotnet publish DentalApp/DentalApp.csproj -c Release -f net10.0-android
+        run: dotnet build DentalApp.sln -c Release
+#        run: dotnet publish DentalApp/DentalApp.csproj -c Release -f net10.0-android
 
       # 🔹 Decode keystore тільки для push
       - name: Decode keystore
         if: github.event_name == 'push'
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -D -o dentalapp.keystore
-
-          echo "Files:"
-          ls -la
-
-          echo "Keystore size:"
-          stat -f%z dentalapp.keystore
 
       # 🔹 Signed build тільки після merge
       - name: Build signed AAB
@@ -67,12 +62,29 @@ jobs:
             /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} \
             /p:AndroidSigningKeyAlias=${{ secrets.KEY_ALIAS }} \
             /p:AndroidSigningKeyPass=${{ secrets.KEY_PASSWORD }}
+      
+      # 👉 APK для тебе (без підпису, але ставиться)
+      - name: Build APK
+        if: github.event_name == 'push'
+        run: |
+          dotnet build DentalApp/DentalApp.csproj \
+            -c Release \
+            -f net10.0-android \
+            /p:AndroidPackageFormat=apk
 
-      # 🔹 Artifact тільки для релізу
-      - name: Upload AAB
+      - name: Upload artifacts
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: android-signed-build
+          name: android-build
           path: |
+            **/bin/Release/net10.0-android/**/*.apk
             **/bin/Release/net10.0-android/**/*.aab
+#      # 🔹 Artifact тільки для релізу
+#      - name: Upload AAB
+#        if: github.event_name == 'push'
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: android-signed-build
+#          path: |
+#            **/bin/Release/net10.0-android/**/*.aab
