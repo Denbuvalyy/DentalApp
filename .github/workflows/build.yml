@@ -41,7 +41,7 @@ jobs:
       # 🔹 PR build (без підпису)
       - name: Build (PR - unsigned)
         if: github.event_name == 'pull_request'
-        run: dotnet build DentalApp.sln -c Release
+        run: dotnet build DentalApp/DentalApp.csproj -c Release -f net10.0-android
 #        run: dotnet publish DentalApp/DentalApp.csproj -c Release -f net10.0-android
 
       # 🔹 Decode keystore тільки для push
