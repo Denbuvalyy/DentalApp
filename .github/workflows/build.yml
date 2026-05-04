@@ -33,7 +33,9 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Install Android workload
-        run: dotnet workload restore
+        run: |
+          dotnet workload install maui
+          dotnet workload install android
 
       - name: Restore
         run: dotnet restore DentalApp.sln
@@ -63,7 +65,9 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Install Android workload
-        run: dotnet workload restore
+        run: |
+          dotnet workload install maui
+          dotnet workload install android
 
       - name: Restore
         run: dotnet restore DentalApp.sln
