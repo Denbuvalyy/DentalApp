@@ -19,7 +19,7 @@ public partial class VisitDetailsViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private ObservableCollection<VisitPhoto> photos = new();
+    private ObservableCollection<VisitPhoto> _photos = new();
 
     private int visitId;
 

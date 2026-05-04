@@ -7,7 +7,7 @@ namespace DentalApp.ViewModels;
 public partial class PhotoViewModel : ObservableObject
 {
     [ObservableProperty]
-    private VisitPhoto photo;
+    private VisitPhoto _photo;
 
     [RelayCommand]
     private async Task Close()
