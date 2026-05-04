@@ -1,0 +1,122 @@
+name: CI/CD MAUI Android (.NET 10)
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+
+  push:
+    branches:
+      - develop
+      - main
+
+jobs:
+
+  # =========================
+  # 🧪 CHECK (PR)
+  # =========================
+  check:
+    if: github.event_name == 'pull_request'
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Cache .NET workloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.dotnet
+          key: dotnet-${{ runner.os }}-${{ hashFiles('**/*.csproj') }} 
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install MAUI workload
+        run: |
+          dotnet workload install maui
+          dotnet workload install android
+
+      - name: Restore
+        run: dotnet restore DentalApp.sln
+
+      - name: Tests
+        run: dotnet test DentalApp.Tests/DentalApp.Tests.csproj -c Release --no-restore
+
+      - name: Build Android (PR only)
+        run: dotnet build DentalApp/DentalApp.csproj -c Release -f net10.0-android
+
+
+  # =========================
+  # 🚀 RELEASE (MERGE)
+  # =========================
+  release:
+    if: github.event_name == 'push'
+    runs-on: macos-latest
+    needs: check   # 👉 гарантує що PR пройшов
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Cache .NET workloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.dotnet
+          key: dotnet-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install MAUI workload
+        run: |
+          dotnet workload install maui
+          dotnet workload install android
+
+      - name: Restore
+        run: dotnet restore DentalApp.sln
+
+      - name: Run tests (again for safety)
+        run: dotnet test DentalApp.Tests/DentalApp.Tests.csproj -c Release --no-restore
+
+      # 🔐 Decode keystore
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -D -o dentalapp.keystore
+
+      # 📦 SIGNED AAB (Google Play)
+      - name: Build SIGNED AAB
+        run: |
+          dotnet publish DentalApp/DentalApp.csproj \
+            -c Release \
+            -f net10.0-android \
+            /p:AndroidKeyStore=true \
+            /p:AndroidSigningKeyStore=$(pwd)/dentalapp.keystore \
+            /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} \
+            /p:AndroidSigningKeyAlias=${{ secrets.KEY_ALIAS }} \
+            /p:AndroidSigningKeyPass=${{ secrets.KEY_PASSWORD }}
+
+      # 📱 APK (для тебе)
+      - name: Build APK
+        run: |
+          dotnet build DentalApp/DentalApp.csproj \
+            -c Release \
+            -f net10.0-android \
+            /p:AndroidPackageFormat=apk
+
+      # 📤 Artifacts
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build
+          path: |
+            **/bin/Release/net10.0-android/**/*.apk
+            **/bin/Release/net10.0-android/**/*.aab
