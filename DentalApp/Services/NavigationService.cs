@@ -1,6 +1,7 @@
 using DentalApp.Constants;
 using DentalApp.Core.Interfaces;
 using DentalApp.Core.Models;
+using DentalApp.ViewModels;
 
 namespace DentalApp.Services;
 
@@ -89,6 +90,18 @@ public class NavigationService : INavigationService, INavigationResult
     // =========================
     // 🔹 PHOTOS
     // =========================
+    public Task GoToGallery(
+        List<VisitPhoto> photos,
+        int startIndex)
+    {
+        return Shell.Current.GoToAsync(
+            Routes.Gallery,
+            new Dictionary<string, object>
+            {
+                ["photos"] = photos,
+                ["index"] = startIndex
+            });
+    }
 
     public Task GoToPhoto(VisitPhoto photo)
     {

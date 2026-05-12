@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="DentalApp.Pages.VisitDetailsPage">
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:DentalApp.ViewModels"
+    xmlns:models="clr-namespace:DentalApp.Core.Models"
+    x:Class="DentalApp.Pages.VisitDetailsPage"
+    x:DataType="vm:VisitDetailsViewModel"
+    x:Name="Page">
     <ContentPage.Content>
         <VerticalStackLayout Padding="16" Spacing="12">
 
@@ -12,24 +17,29 @@
                             ItemsLayout="VerticalGrid, 3">
 
                 <CollectionView.ItemTemplate>
-                    <DataTemplate>
+
+                    <DataTemplate x:DataType="vm:VisitPhotoItemViewModel">
 
                         <Frame Padding="2" Margin="4">
 
                             <Frame.GestureRecognizers>
                                 <TapGestureRecognizer
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenPhotoCommand}"
+                                    Command="{Binding Source={x:Reference Page}, Path=BindingContext.OpenPhotoCommand}"
                                     CommandParameter="{Binding .}" />
                             </Frame.GestureRecognizers>
-
-                            <Image Source="{Binding FilePath}"
-                                   HeightRequest="100"
-                                   WidthRequest="100"
-                                   Aspect="AspectFill"/>
-
+                            <VerticalStackLayout>
+                                <Label
+                                    Text="{Binding CreatedAt}"
+                                    TextColor="Black"/>
+                                <Image Source="{Binding Image}"
+                                       HeightRequest="100"
+                                       WidthRequest="100"
+                                       Aspect="AspectFill"/>
+                            </VerticalStackLayout>
                         </Frame>
 
                     </DataTemplate>
+
                 </CollectionView.ItemTemplate>
 
             </CollectionView>

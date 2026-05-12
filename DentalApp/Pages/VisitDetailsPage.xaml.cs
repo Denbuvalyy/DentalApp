@@ -21,8 +21,8 @@ public partial class VisitDetailsPage : ContentPage, IQueryAttributable
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.TryGetValue("visitId", out var value) &&
-            value is string str &&
-            int.TryParse(str, out var id))
+            value is int id)// &&
+            //int.TryParse(str, out var id))
         {
             _ = _vm.Init(id);
         }
