@@ -42,6 +42,11 @@ public static class MauiProgram
         builder.Services.AddTransient<AddVisitViewModel>();
         builder.Services.AddTransient<AddVisitPage>();
         builder.Services.AddTransient<IVisitPhotoRepository, VisitPhotoRepository>();
+        builder.Services.AddTransient<VisitDetailsViewModel>();
+        builder.Services.AddTransient<VisitDetailsPage>();
+        builder.Services.AddTransient<PhotoViewModel>();
+        builder.Services.AddTransient<GalleryPage>();
+        builder.Services.AddTransient<GalleryViewModel>();
 
         // 🔥 1. Створюємо app
         var app = builder.Build();

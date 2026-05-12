@@ -11,4 +11,7 @@ public static class Routes
     public const string AddVisit = nameof(AddVisitPage);
 
     public const string Photo = nameof(PhotoPage);
+    public const string Gallery = nameof(GalleryPage);
+    
+    
 }
