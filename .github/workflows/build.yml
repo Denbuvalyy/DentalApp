@@ -8,17 +8,19 @@ on:
     branches:
       - develop
       - main
+      - 'release/*'
 
   push:
     branches:
+      - develop
       - main
       - 'release/*'
 
 jobs:
 
-  # =========================
-  # 🧪 CHECK (PR)
-  # =========================
+  # =========================================
+  # 🧪 CHECK PRs
+  # =========================================
   check:
     if: github.event_name == 'pull_request'
     runs-on: macos-latest
@@ -26,44 +28,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
-      - name: Cache .NET workloads
-        uses: actions/cache@v4
-        with:
-          path: ~/.dotnet
-          key: dotnet-${{ runner.os }}-${{ hashFiles('**/*.csproj') }} 
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 10.0.x
-
-      - name: Install MAUI workload
-        run: |
-          dotnet workload install maui
-          dotnet workload install android
-
-      - name: Restore
-        run: dotnet restore DentalApp.sln
-
-      - name: Tests
-        run: dotnet test DentalApp.Tests/DentalApp.Tests.csproj -c Release --no-restore
-
-      - name: Build Android (PR only)
-        run: dotnet build DentalApp/DentalApp.csproj -c Release -f net10.0-android
-
-
-  # =========================
-  # 🚀 RELEASE (MERGE)
-  # =========================
-  release:
-    if: github.event_name == 'push'
-    runs-on: macos-latest    
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        
       - name: Cache .NET workloads
         uses: actions/cache@v4
         with:
@@ -75,7 +40,7 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Install MAUI workload
+      - name: Install MAUI workloads
         run: |
           dotnet workload install maui
           dotnet workload install android
@@ -83,7 +48,99 @@ jobs:
       - name: Restore
         run: dotnet restore DentalApp.sln
 
-      - name: Run tests (again for safety)
+      - name: Run tests
+        run: dotnet test DentalApp.Tests/DentalApp.Tests.csproj -c Release --no-restore
+
+      - name: Build Android
+        run: |
+          dotnet build DentalApp/DentalApp.csproj \
+            -c Release \
+            -f net10.0-android
+
+
+  # =========================================
+  # 📱 BUILD APK ARTIFACTS
+  # develop / release / main
+  # =========================================
+  android-artifacts:
+    if: github.event_name == 'push'
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache .NET workloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.dotnet
+          key: dotnet-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install MAUI workloads
+        run: |
+          dotnet workload install maui
+          dotnet workload install android
+
+      - name: Restore
+        run: dotnet restore DentalApp.sln
+
+      - name: Run tests
+        run: dotnet test DentalApp.Tests/DentalApp.Tests.csproj -c Release --no-restore
+
+      - name: Build APK
+        run: |
+          dotnet build DentalApp/DentalApp.csproj \
+            -c Release \
+            -f net10.0-android \
+            /p:AndroidPackageFormat=apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: |
+            **/bin/Release/net10.0-android/**/*.apk
+
+
+  # =========================================
+  # 🚀 GOOGLE PLAY INTERNAL TESTING
+  # ONLY release/*
+  # =========================================
+  google-play-internal:
+    if: |
+      github.event_name == 'push' &&
+      startsWith(github.ref, 'refs/heads/release/')
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache .NET workloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.dotnet
+          key: dotnet-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install MAUI workloads
+        run: |
+          dotnet workload install maui
+          dotnet workload install android
+
+      - name: Restore
+        run: dotnet restore DentalApp.sln
+
+      - name: Run tests
         run: dotnet test DentalApp.Tests/DentalApp.Tests.csproj -c Release --no-restore
 
       # 🔐 Decode keystore
@@ -91,7 +148,7 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -D -o dentalapp.keystore
 
-      # 📦 SIGNED AAB (Google Play)
+      # 📦 Build signed AAB
       - name: Build SIGNED AAB
         run: |
           dotnet publish DentalApp/DentalApp.csproj \
@@ -103,28 +160,19 @@ jobs:
             /p:AndroidSigningKeyAlias=${{ secrets.KEY_ALIAS }} \
             /p:AndroidSigningKeyPass=${{ secrets.KEY_PASSWORD }}
 
+      # 🚀 Upload to Google Play Internal Testing
       - name: Upload to Google Play Internal Testing
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.dankoapps.dentalapp
-          releaseFiles: DentalApp/bin/Release/net10.0-android/publish/*.aab
-          track: internal
+          releaseFiles: DentalApp/bin/Release/net10.0-android/publish/*-Signed.aab
+          tracks: internal
           status: completed
 
-      # 📱 APK (для тебе)
-      - name: Build APK
-        run: |
-          dotnet build DentalApp/DentalApp.csproj \
-            -c Release \
-            -f net10.0-android \
-            /p:AndroidPackageFormat=apk
-
-      # 📤 Artifacts
-      - name: Upload artifacts
+      - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-build
+          name: android-aab
           path: |
-            **/bin/Release/net10.0-android/**/*.apk
             **/bin/Release/net10.0-android/**/*.aab
