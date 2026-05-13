@@ -25,7 +25,7 @@ public partial class PatientDetailsViewModel : ObservableObject
         _navigationService = navigationService;
     }
 
-    private int patientId;
+    private int _patientId;
 
     public string PatientId
     {
@@ -33,14 +33,14 @@ public partial class PatientDetailsViewModel : ObservableObject
         {
             if (int.TryParse(value, out var id))
             {
-                patientId = id;
+                _patientId = id;
                 _ = Load(id);
             }
         }
     }
 
     [ObservableProperty]
-    private Patient patient;
+    private Patient _patient;
 
     [ObservableProperty]
     private ObservableCollection<Visit> visits = new();
@@ -62,7 +62,7 @@ public partial class PatientDetailsViewModel : ObservableObject
     private async Task AddVisit()
     {
         //var visit = await _navigationService.GoToAddVisit(patientId);
-        await Shell.Current.GoToAsync($"{Routes.AddVisit}?patientId={patient.Id}");
+        await Shell.Current.GoToAsync($"{Routes.AddVisit}?patientId={Patient.Id}");
 
         // if (visit != null)
         //     Visits.Add(visit);

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:DentalApp.ViewModels"
+    xmlns:controls="clr-namespace:DentalApp.Controls"
+    x:Class="DentalApp.Pages.GalleryPage"
+    x:DataType="vm:GalleryViewModel"
+    BackgroundColor="Black">
+
+    <Grid>
+
+        <CarouselView
+            ItemsSource="{Binding Photos}"
+            Position="{Binding CurrentIndex}"
+            IsSwipeEnabled="{Binding IsSwipeEnabled}">
+
+            <CarouselView.ItemTemplate>
+
+                <DataTemplate x:DataType="vm:GalleryPhotoItemViewModel">
+
+                    <Grid>
+
+                        <controls:ZoomImageView
+                            Source="{Binding Image}"
+                            IsZoomed="{Binding IsZoomed}" />
+
+                    </Grid>
+
+                </DataTemplate>
+
+            </CarouselView.ItemTemplate>
+
+        </CarouselView>
+
+        <Button
+            Text="✕"
+            Command="{Binding CloseCommand}"
+            HorizontalOptions="End"
+            VerticalOptions="Start"
+            Margin="16"/>
+
+    </Grid>
+
+</ContentPage>

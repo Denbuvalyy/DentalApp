@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace DentalApp.Core.Models;
 
 public class VisitPhoto

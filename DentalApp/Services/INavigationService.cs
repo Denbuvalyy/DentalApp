@@ -13,7 +13,10 @@ public interface INavigationService
     Task GoToVisitDetails(int visitId);
 
     // Photos
-    Task GoToPhoto(VisitPhoto photo);
+    Task GoToGallery(
+        List<VisitPhoto> photos,
+        int startIndex);
+    //Task GoToPhoto(VisitPhoto photo);
 
     // Base
     Task GoBack();

@@ -6,7 +6,7 @@
     <ContentPage.Content>
         <Grid BackgroundColor="Black">
 
-            <Image Source="{Binding FilePath}"
+            <Image Source="{Binding Image}"
                    Aspect="AspectFit"/>
 
             <Button Text="✕"

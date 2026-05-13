@@ -7,7 +7,18 @@ namespace DentalApp.ViewModels;
 public partial class PhotoViewModel : ObservableObject
 {
     [ObservableProperty]
-    private VisitPhoto photo;
+    [NotifyPropertyChangedFor(nameof(Image))]
+    private VisitPhoto? photo;
+
+    public void Init(VisitPhoto photo)
+    {
+        Photo = photo;
+    }
+
+    public ImageSource? Image =>
+        string.IsNullOrWhiteSpace(Photo?.FilePath)
+            ? null
+            : ImageSource.FromFile(Photo.FilePath);
 
     [RelayCommand]
     private async Task Close()

@@ -8,19 +8,24 @@ using DentalApp.ViewModels;
 
 namespace DentalApp.Pages;
 
-[QueryProperty(nameof(Photo), "photo")]
-public partial class PhotoPage : ContentPage
+public partial class PhotoPage : ContentPage, IQueryAttributable
 {
-    public VisitPhoto Photo
-    {
-        set => BindingContext = new PhotoViewModel
-        {
-            Photo = value
-        };
-    }
+    private readonly PhotoViewModel _vm;
 
-    public PhotoPage()
+    public PhotoPage(PhotoViewModel vm)
     {
         InitializeComponent();
+
+        BindingContext = vm;
+        _vm = vm;
+    }
+
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (query.TryGetValue("photo", out var value) &&
+            value is VisitPhoto photo)
+        {
+            _vm.Init(photo);
+        }
     }
 }
