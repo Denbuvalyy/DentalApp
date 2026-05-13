@@ -11,8 +11,8 @@ on:
 
   push:
     branches:
-      - develop
       - main
+      - 'release/*'
 
 jobs:
 
@@ -102,6 +102,15 @@ jobs:
             /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} \
             /p:AndroidSigningKeyAlias=${{ secrets.KEY_ALIAS }} \
             /p:AndroidSigningKeyPass=${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload to Google Play Internal Testing
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.dankoapps.dentalapp
+          releaseFiles: DentalApp/bin/Release/net10.0-android/publish/*.aab
+          track: internal
+          status: completed
 
       # 📱 APK (для тебе)
       - name: Build APK
