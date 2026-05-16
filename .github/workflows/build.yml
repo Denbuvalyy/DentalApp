@@ -24,7 +24,7 @@ jobs:
   # 🧪 CHECK PRs
   # =========================================
   check:
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
 
     steps:
@@ -65,7 +65,7 @@ jobs:
   # develop / release / main
   # =========================================
   android-artifacts:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
 
     steps:
