@@ -30,6 +30,8 @@ public partial class PatientsViewModel : ObservableObject
     [RelayCommand]
     private async Task AddPatient()
     {
+        SentrySdk.Logger.LogInfo("A simple log message");
+        SentrySdk.Logger.LogError("A {0} log message", "formatted");
         await Shell.Current.GoToAsync(nameof(AddPatientPage));
     }
     

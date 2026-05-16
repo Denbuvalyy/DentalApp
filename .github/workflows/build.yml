@@ -99,13 +99,25 @@ jobs:
             -f net10.0-android \
             /p:AndroidPackageFormat=apk
 
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools    
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
           path: |
             **/bin/Release/net10.0-android/**/*.apk
-
+            
+      - name: Upload APK to Firebase App Distribution
+        run: |
+          firebase appdistribution:distribute \
+            DentalApp/bin/Release/net10.0-android/**/*.apk \
+            --app ${{ secrets.FIREBASE_APP_ID }} \
+            --groups "internal-testers" \
+            --release-notes "CI build from ${{ github.ref_name }}"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
   # =========================================
   # 🚀 GOOGLE PLAY INTERNAL TESTING
