@@ -112,7 +112,7 @@ jobs:
       - name: Upload APK to Firebase App Distribution
         run: |
           firebase appdistribution:distribute \
-            DentalApp/bin/Release/net10.0-android/**/*.apk \
+            $(find DentalApp/bin/Release/net10.0-android/ -name "*.apk" | head -n 1) \
             --app ${{ secrets.FIREBASE_APP_ID }} \
             --groups "internal-testers" \
             --release-notes "CI build from ${{ github.ref_name }}"
