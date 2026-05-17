@@ -59,7 +59,6 @@ jobs:
             -c Release \
             -f net10.0-android
 
-
   # =========================================
   # 📱 BUILD APK ARTIFACTS
   # develop / release / main
@@ -99,6 +98,7 @@ jobs:
           dotnet build DentalApp/DentalApp.csproj \
             -c Release \
             -f net10.0-android \
+            /p:ApplicationVersion=${{ github.run_number }} \
             /p:AndroidPackageFormat=apk
 
       - name: Install Firebase CLI
@@ -168,6 +168,7 @@ jobs:
           dotnet publish DentalApp/DentalApp.csproj \
             -c Release \
             -f net10.0-android \
+            /p:ApplicationVersion=${{ github.run_number }} \
             /p:AndroidKeyStore=true \
             /p:AndroidSigningKeyStore=$(pwd)/dentalapp.keystore \
             /p:AndroidSigningStorePass=${{ secrets.KEYSTORE_PASSWORD }} \
