@@ -5,7 +5,7 @@ env:
 
 on:
   workflow_dispatch:
-    
+
   pull_request:
     branches:
       - develop
@@ -18,14 +18,22 @@ on:
       - main
       - 'release/*'
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   # =========================================
-  # 🧪 CHECK PRs
+  # 🧪 CHECK PRs / MANUAL RUN
   # =========================================
   check:
     if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -51,21 +59,34 @@ jobs:
         run: dotnet restore DentalApp.sln
 
       - name: Run tests
-        run: dotnet test DentalApp.Tests/DentalApp.Tests.csproj -c Release --no-restore
+        run: |
+          dotnet test DentalApp.Tests/DentalApp.Tests.csproj \
+            -c Release \
+            --no-restore
 
       - name: Build Android
         run: |
           dotnet build DentalApp/DentalApp.csproj \
             -c Release \
-            -f net10.0-android
+            -f net10.0-android \
+            /p:ApplicationVersion=${{ github.run_number }}
 
   # =========================================
-  # 📱 BUILD APK ARTIFACTS
-  # develop / release / main
+  # 📱 FIREBASE DISTRIBUTION
+  # develop + release/*
   # =========================================
-  android-artifacts:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+  firebase-distribution:
+    if: |
+      (
+        github.event_name == 'push' &&
+        (
+          github.ref == 'refs/heads/develop' ||
+          startsWith(github.ref, 'refs/heads/release/')
+        )
+      ) ||
+      github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -91,7 +112,10 @@ jobs:
         run: dotnet restore DentalApp.sln
 
       - name: Run tests
-        run: dotnet test DentalApp.Tests/DentalApp.Tests.csproj -c Release --no-restore
+        run: |
+          dotnet test DentalApp.Tests/DentalApp.Tests.csproj \
+            -c Release \
+            --no-restore
 
       - name: Build APK
         run: |
@@ -102,22 +126,26 @@ jobs:
             /p:AndroidPackageFormat=apk
 
       - name: Install Firebase CLI
-        run: npm install -g firebase-tools    
+        run: npm install -g firebase-tools
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk
+          name: android-apk-${{ github.run_number }}
           path: |
             **/bin/Release/net10.0-android/**/*.apk
-            
+
       - name: Upload APK to Firebase App Distribution
         run: |
           firebase appdistribution:distribute \
             $(find DentalApp/bin/Release/net10.0-android/ -name "*.apk" | head -n 1) \
             --app ${{ secrets.FIREBASE_APP_ID }} \
             --groups "internal-testers" \
-            --release-notes "CI build from ${{ github.ref_name }}"
+            --release-notes "
+            Branch: ${{ github.ref_name }}
+            Build: ${{ github.run_number }}
+            Commit: ${{ github.sha }}
+            "
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
@@ -130,6 +158,7 @@ jobs:
       github.event_name == 'push' &&
       startsWith(github.ref, 'refs/heads/release/')
     runs-on: macos-latest
+    timeout-minutes: 45
 
     steps:
       - name: Checkout
@@ -155,7 +184,10 @@ jobs:
         run: dotnet restore DentalApp.sln
 
       - name: Run tests
-        run: dotnet test DentalApp.Tests/DentalApp.Tests.csproj -c Release --no-restore
+        run: |
+          dotnet test DentalApp.Tests/DentalApp.Tests.csproj \
+            -c Release \
+            --no-restore
 
       # 🔐 Decode keystore
       - name: Decode keystore
@@ -188,6 +220,6 @@ jobs:
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-aab
+          name: android-aab-${{ github.run_number }}
           path: |
-            **/bin/Release/net10.0-android/**/*.aab
+            **/bin/Release/net10.0-android/**/*.aab  

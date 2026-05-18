@@ -34,6 +34,8 @@ public static class MauiProgram
                 options.TracesSampleRate = 1.0;
                 // Enable logs to be sent to Sentry
                 options.EnableLogs = true;
+                options.Release =
+                    $"{AppInfo.VersionString} ({AppInfo.BuildString})";
 #if DEBUG
                 options.Environment = "development";
 #else
