@@ -58,11 +58,28 @@ jobs:
       - name: Restore
         run: dotnet restore DentalApp.sln
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
           dotnet test DentalApp.Tests/DentalApp.Tests.csproj \
             -c Release \
-            --no-restore
+            --collect:"XPlat Code Coverage"
+
+      - name: Install ReportGenerator
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Generate coverage report
+        run: |
+          reportgenerator \
+            -reports:**/coverage.cobertura.xml \
+            -targetdir:coverage-report \
+            -reporttypes:Html
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage-report
 
       - name: Build Android
         run: |
